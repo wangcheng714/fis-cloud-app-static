@@ -1,5 +1,7 @@
 var fis = require('fis-cloud-kernal'),
-    url = require('url');
+    url = require('url'),
+    mime = require('mime'),
+    fs = require('fs');
 
 function getAppDir(appname) {
     var app = 'fis-cloud-app-' + appname;
@@ -18,7 +20,10 @@ module.exports = function(req, res){
     var appDir = getAppDir(urlSplit.shift());
     var filepath = appDir + urlSplit.join('/');
     if(fis.util.isFile(filepath)){
-        res.sendfile(filepath);
+        var contentType = mime.lookup(filepath),
+            content = fs.readFileSync(filepath);
+        res.type(contentType);
+        res.send(content);
     }else{
         res.send(404);
     }
