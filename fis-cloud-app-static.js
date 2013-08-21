@@ -1,30 +1,26 @@
-var fis = require('fis-cloud-kernal'),
-    url = require('url'),
-    mime = require('mime'),
-    fs = require('fs');
+'use strict';
 
-function getAppDir(appname) {
-    var app = 'fis-cloud-app-' + appname;
-    var path = fis.util.realpath(require.resolve(app));
-    var appDir = path.substr(0, path.lastIndexOf('/') + 1);
-    return appDir;
+function getAppDir(appName) {
+    var app = 'fis-cloud-app-' + appName,
+        path = fis.util.realpath(require.resolve(app));
+    return path.substr(0, path.lastIndexOf('/') + 1);
 }
 
 module.exports = function(req, res){
-    var pathname = url.parse(req.url).pathname;
-    if(pathname.substr(0, 1) === '/'){
-        pathname = pathname.substr(1);
+    var pathName = req.path;
+    if(pathName.substr(0, 1) === '/'){
+        pathName = pathName.substr(1);
     }
-    var urlSplit =  pathname.split('/');
-    urlSplit.splice(0, 1);
-    var appDir = getAppDir(urlSplit.shift());
-    var filepath = appDir + urlSplit.join('/');
-    if(fis.util.isFile(filepath)){
-        var contentType = mime.lookup(filepath),
-            content = fs.readFileSync(filepath);
+    var urlSplit =  pathName.split('/'),
+        appDir = getAppDir(urlSplit.splice(1,1)[0]), //拿出数组的第二项即为app的name
+        filePath = appDir + urlSplit.join('/');      //默认查找app下面的static目录
+    if(fis.util.isFile(filePath)){
+        var ext = fis.util.pathinfo(filePath).ext,
+            contentType = fis.util.getMimeType(ext),
+            content = fis.util.read(filePath);
         res.type(contentType);
         res.send(content);
     }else{
         res.send(404);
     }
-}
+};
