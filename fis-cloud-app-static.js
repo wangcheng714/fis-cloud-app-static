@@ -18,7 +18,7 @@ module.exports = function(req, res){
         var ext = fis.util.pathinfo(filePath).ext,
             contentType = fis.util.getMimeType(ext),
             content = fis.util.read(filePath);
-        res.set('Connection', 'close'); //请求应答之后关闭TCP连接，并监听TCP连接关闭事件杀死子进程
+        //res.set('Connection', 'close'); //请求应答之后关闭TCP连接，并监听TCP连接关闭事件杀死子进程
         res.type(contentType);
         res.send(content);
     }else{
